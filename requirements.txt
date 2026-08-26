@@ -1,0 +1,2 @@
+# This project uses only the Python standard library on Windows.
+# No third-party packages need to be installed.

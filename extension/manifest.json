@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Local SSO Portal",
+  "version": "0.1.7",
+  "description": "Fills configured local credentials only after a portal launch.",
+  "permissions": ["tabs", "storage"],
+  "host_permissions": [
+    "http://127.0.0.1:8765/*",
+    "https://example.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://127.0.0.1:8765/*"],
+      "js": ["portal-bridge.js"]
+    },
+    {
+      "matches": [
+        "https://example.com/*"
+      ],
+      "js": ["login-fill.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ]
+}

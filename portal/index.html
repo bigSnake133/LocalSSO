@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>工作台</title>
+    <link rel="icon" type="image/png" href="assets/workbench-logo.png?v=1">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div id="shell" class="shell">
+      <aside class="workspace-panel">
+        <button id="toggle-sidebar" class="sidebar-toggle" type="button" aria-expanded="false" aria-label="展开工作台">
+          <span aria-hidden="true">›</span>
+        </button>
+        <a class="workspace-logo" href="/" aria-label="&#24037;&#20316;&#21488;&#39318;&#39029;">
+          <img src="assets/workbench-logo.png" alt="">
+          <span>&#24037;&#20316;&#21488;</span>
+        </a>
+        <div class="workspace-copy">
+          <p class="eyebrow">LOCAL LAUNCHPAD</p>
+          <h1>工作台</h1>
+          <p class="panel-copy">把常用系统收在一处。点击卡片后，浏览器扩展会在新标签页完成已配置的登录。</p>
+        </div>
+        <div class="panel-footer">
+          <button id="add-app" class="add-button" type="button"><span>+</span><b>添加链接</b></button>
+          <p id="status" class="status" aria-live="polite">正在加载链接…</p>
+        </div>
+      </aside>
+
+      <main class="content-panel">
+        <header class="content-heading">
+          <div>
+            <p class="section-kicker">MY SYSTEMS</p>
+            <h2>本地SSO列表</h2>
+          </div>
+          <div class="heading-actions"><button id="add-group" class="group-button" type="button">+ 新建区块</button><span id="app-count" class="app-count">0</span></div>
+        </header>
+        <section id="group-board" class="group-board" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <dialog id="app-dialog" class="app-dialog">
+      <form id="app-form" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p id="dialog-kicker" class="section-kicker">NEW LINK</p>
+            <h2 id="dialog-title">添加链接</h2>
+          </div>
+          <button class="icon-button" type="button" value="cancel" data-close-dialog aria-label="关闭">×</button>
+        </div>
+        <input id="app-id" name="id" type="hidden">
+        <div class="field-grid visual-fields">
+          <label>头像<input id="app-avatar" name="avatar" maxlength="8" placeholder="例如：文 / 🔐"></label>
+          <label>卡片颜色<input id="app-color" name="color" type="color" value="#d3552d"></label>
+        </div>
+        <label>标题<input id="app-name" name="name" maxlength="80" required placeholder="例如：项目管理"></label>
+        <label>URL 地址<input id="app-url" name="url" type="url" required placeholder="https://example.com/login"></label>
+        <label>所属区块<select id="app-group" name="groupId"></select></label>
+        <div class="credential-heading">
+          <strong>登录信息 <small>可选</small></strong>
+          <span id="credential-note"></span>
+        </div>
+        <label>用户名<input id="app-username" name="username" maxlength="512" autocomplete="off" placeholder="可不填写"></label>
+        <label>密码<input id="app-password" name="password" type="password" maxlength="2048" autocomplete="new-password" placeholder="可不填写"></label>
+        <label id="clear-credentials-row" class="check-row" hidden><input id="clear-credentials" type="checkbox"> 清除已保存的登录信息</label>
+        <p id="form-error" class="form-error" aria-live="polite"></p>
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" data-close-dialog>取消</button>
+          <button class="primary-button" type="submit">保存链接</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
+</html>

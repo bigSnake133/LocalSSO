@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "groups": [
+    {"id": "work", "name": "工作", "color": "#147a72"},
+    {"id": "personal", "name": "个人", "color": "#d3552d"},
+    {"id": "uncategorized", "name": "未分类", "color": "#8a6e39"}
+  ],
+  "apps": [
+    {
+      "id": "example-application",
+      "name": "示例应用（不含凭据）",
+      "url": "https://example.com/login",
+      "avatar": "示",
+      "color": "#147a72",
+      "groupId": "uncategorized",
+      "login": {
+        "usernameSelector": "input[autocomplete='username'], input[name='username']",
+        "passwordSelector": "input[type='password']",
+        "submitSelector": "button[type='submit'], input[type='submit']",
+        "autoSubmit": false
+      }
+    }
+  ]
+}

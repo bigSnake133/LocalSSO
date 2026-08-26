@@ -1,0 +1,15 @@
+# Per-user encrypted credential vault. Never commit this file or copies of it.
+vault.json
+vault.json.*
+*.bak
+*.log
+
+# Python runtime artifacts.
+__pycache__/
+*.py[cod]
+
+# Local editor and operating-system artifacts.
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
