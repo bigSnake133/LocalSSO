@@ -71,6 +71,22 @@ def default_login(app_id: str, has_username: bool, has_password: bool) -> dict:
     }
 
 
+def app_login(app: dict) -> dict:
+    credential = app.get("credential", {})
+    login = default_login(app["id"], bool(credential.get("username")), bool(credential.get("password")))
+    custom = app.get("login")
+    if not isinstance(custom, dict):
+        return login
+    for field in ("usernameSelector", "passwordSelector", "submitSelector", "preLoginSelector", "preLoginText", "submitText"):
+        value = custom.get(field)
+        if isinstance(value, str) and len(value) <= 1_024:
+            login[field] = value
+    for field in ("autoSubmit", "preLoginOnly"):
+        if isinstance(custom.get(field), bool):
+            login[field] = custom[field]
+    return login
+
+
 def public_app(app: dict) -> dict:
     credential = app.get("credential", {})
     has_username = bool(credential.get("username"))
@@ -87,7 +103,9 @@ def public_app(app: dict) -> dict:
         "groupId": app.get("groupId") or default_group(app["id"]),
     }
     if credential:
-        result["login"] = default_login(app["id"], has_username, has_password)
+        if credential.get("username"):
+            result["username"] = unprotect(credential["username"])
+        result["login"] = app_login(app)
     return result
 
 
@@ -131,7 +149,8 @@ def build_app(payload: dict, existing: dict | None, group_ids: set[str]) -> dict
 
     if credential:
         app["credential"] = credential
-        app["login"] = default_login(app_id, bool(credential.get("username")), bool(credential.get("password")))
+        existing_login = (existing or {}).get("login")
+        app["login"] = dict(existing_login) if isinstance(existing_login, dict) else default_login(app_id, bool(credential.get("username")), bool(credential.get("password")))
     return app
 
 
@@ -182,7 +201,7 @@ class Handler(BaseHTTPRequestHandler):
                 {
                     "username": unprotect(credential["username"]) if credential.get("username") else "",
                     "password": unprotect(credential["password"]) if credential.get("password") else "",
-                    "login": default_login(app["id"], bool(credential.get("username")), bool(credential.get("password"))),
+                    "login": app_login(app),
                 },
             )
             return

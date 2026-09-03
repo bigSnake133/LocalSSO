@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,18 +29,20 @@ class ServerUnitTests(unittest.TestCase):
         groups = server.ensure_groups(vault)
         self.assertEqual({group["id"] for group in groups}, {"work", "personal", "uncategorized"})
 
-    def test_public_app_does_not_decrypt_or_return_a_username(self) -> None:
+    def test_public_app_returns_a_username_but_keeps_the_password_masked(self) -> None:
         app = {
             "id": "example-application",
             "name": "Example Application",
             "url": "https://example.com/login",
             "credential": {"username": "not-read-by-this-test", "password": "not-read-by-this-test"},
         }
-        public = server.public_app(app)
+        with patch.object(server, "unprotect", return_value="example.user") as unprotect:
+            public = server.public_app(app)
         self.assertTrue(public["hasUsername"])
         self.assertTrue(public["hasPassword"])
-        self.assertNotIn("username", public)
+        self.assertEqual(public["username"], "example.user")
         self.assertEqual(public["passwordMasked"], "********")
+        unprotect.assert_called_once_with("not-read-by-this-test")
 
     def test_build_app_rejects_a_non_http_url(self) -> None:
         with self.assertRaisesRegex(ValueError, "URL"):
@@ -48,6 +51,20 @@ class ServerUnitTests(unittest.TestCase):
                 None,
                 {"uncategorized"},
             )
+
+    def test_public_app_preserves_a_custom_login_flow(self) -> None:
+        app = {
+            "id": "example-application",
+            "name": "Example Application",
+            "url": "https://example.com/login",
+            "credential": {"username": "protected-user", "password": "protected-password"},
+            "login": {"preLoginSelector": "button", "preLoginText": "HTML5", "autoSubmit": False},
+        }
+        with patch.object(server, "unprotect", return_value="example.user"):
+            public = server.public_app(app)
+        self.assertEqual(public["login"]["preLoginSelector"], "button")
+        self.assertEqual(public["login"]["preLoginText"], "HTML5")
+        self.assertFalse(public["login"]["autoSubmit"])
 
 
 if __name__ == "__main__":

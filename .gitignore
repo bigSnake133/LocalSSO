@@ -4,6 +4,9 @@ vault.json.*
 *.bak
 *.log
 
+# Local browser permissions can identify private infrastructure. Keep this file local.
+extension/manifest.json
+
 # Python runtime artifacts.
 __pycache__/
 *.py[cod]

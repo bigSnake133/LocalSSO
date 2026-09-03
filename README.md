@@ -47,7 +47,7 @@ py -3 .\setup_vault.py
 
 1. 在 Chrome 打开 `chrome://extensions`，或在 Edge 打开 `edge://extensions`。
 2. 开启“开发者模式”，选择“加载已解压的扩展程序”，选择本仓库的 `extension` 目录。
-3. 编辑 `extension/manifest.json` 中 `host_permissions` 和第二个 `content_scripts[].matches`：将 `https://example.com/*` 精确替换成你**有权使用**的登录域名模式。
+3. 先复制示例清单：`Copy-Item .\extension\manifest.example.json .\extension\manifest.json`。然后编辑 `extension/manifest.json` 中的 `host_permissions` 和第二个 `content_scripts[].matches`，将 `https://example.com/*` 精确替换成你**有权使用**的登录域名模式。
 4. 在扩展页点击重新加载，然后刷新本地门户。
 5. 为每个应用在门户中填写正确的 URL 和 CSS 选择器。默认选择器只是常见网页的回退值；请先在非生产账号或测试页面上验证，必要时关闭“自动提交”。
 

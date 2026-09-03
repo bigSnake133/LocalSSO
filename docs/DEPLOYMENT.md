@@ -41,7 +41,13 @@ This command changes file permissions. Do not run it for a shared vault or an ac
 
 ## 4. Configure the browser extension
 
-Before loading the extension, edit `extension/manifest.json`.
+Before loading the extension, create a private manifest from the tracked example:
+
+```powershell
+Copy-Item .\extension\manifest.example.json .\extension\manifest.json
+```
+
+Then edit `extension/manifest.json`. It is intentionally ignored by Git because browser host permissions may disclose private infrastructure.
 
 - Keep `http://127.0.0.1:8765/*`.
 - Replace the two `https://example.com/*` entries with the same exact, authorized site pattern, for example `https://login.example.org/*`.

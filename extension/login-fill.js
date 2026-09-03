@@ -1,9 +1,13 @@
 function waitForSelector(selector, timeoutMs = 10000) {
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector(selector);
+    const findVisible = () => [...document.querySelectorAll(selector)].find((element) => {
+      const style = window.getComputedStyle(element);
+      return !element.disabled && element.type !== "hidden" && style.display !== "none" && style.visibility !== "hidden" && element.getClientRects().length > 0;
+    });
+    const existing = findVisible();
     if (existing) return resolve(existing);
     const observer = new MutationObserver(() => {
-      const element = document.querySelector(selector);
+      const element = findVisible();
       if (!element) return;
       observer.disconnect();
       clearTimeout(timer);
@@ -25,9 +29,18 @@ function setInputValue(element, value) {
   element.dispatchEvent(new Event("blur", { bubbles: true }));
 }
 
-function waitForEnabledSelector(selector, timeoutMs = 10000) {
+function waitForLoginAction(login, timeoutMs = 10000) {
   return new Promise((resolve, reject) => {
-    const findEnabled = () => [...document.querySelectorAll(selector)].find((element) => !element.disabled && element.getAttribute("aria-disabled") !== "true");
+    const findEnabled = () => {
+      const candidates = login.submitSelector ? [...document.querySelectorAll(login.submitSelector)] : [];
+      if (login.submitText) {
+        document.querySelectorAll("button, input[type='button'], input[type='submit'], a[role='button']").forEach((element) => {
+          const text = (element.textContent || element.value || "").trim();
+          if (text.includes(login.submitText)) candidates.push(element);
+        });
+      }
+      return candidates.find((element) => !element.disabled && element.getAttribute("aria-disabled") !== "true" && element.getClientRects().length > 0);
+    };
     const existing = findEnabled();
     if (existing) return resolve(existing);
     const observer = new MutationObserver(() => {
@@ -75,7 +88,7 @@ async function fillLogin() {
   if (!pending?.ok || !pending.login) return;
   const { login } = pending;
   if (login.preLoginSelector) {
-    const entry = await waitForPreLoginEntry(login);
+    const entry = await waitForPreLoginEntry(login, 2000);
     if (entry) {
       entry.click();
       return;
@@ -90,7 +103,7 @@ async function fillLogin() {
   if (!result?.ok) return;
   if (usernameInput && result.username) setInputValue(usernameInput, result.username);
   if (passwordInput && result.password) setInputValue(passwordInput, result.password);
-  if (login.autoSubmit) (await waitForEnabledSelector(login.submitSelector)).click();
+  if (login.autoSubmit) (await waitForLoginAction(login)).click();
 }
 
 fillLogin().catch((error) => console.warn("Local SSO could not fill this login page:", error.message));

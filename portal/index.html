@@ -62,7 +62,12 @@
           <span id="credential-note"></span>
         </div>
         <label>用户名<input id="app-username" name="username" maxlength="512" autocomplete="off" placeholder="可不填写"></label>
-        <label>密码<input id="app-password" name="password" type="password" maxlength="2048" autocomplete="new-password" placeholder="可不填写"></label>
+        <label>密码
+          <span class="password-input">
+            <input id="app-password" name="password" type="password" maxlength="2048" autocomplete="new-password" placeholder="可不填写">
+            <button id="toggle-password" class="password-toggle" type="button" aria-label="显示密码" aria-pressed="false" title="显示密码">&#128065;</button>
+          </span>
+        </label>
         <label id="clear-credentials-row" class="check-row" hidden><input id="clear-credentials" type="checkbox"> 清除已保存的登录信息</label>
         <p id="form-error" class="form-error" aria-live="polite"></p>
         <div class="dialog-actions">

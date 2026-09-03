@@ -18,9 +18,7 @@
       "js": ["portal-bridge.js"]
     },
     {
-      "matches": [
-        "https://example.com/*"
-      ],
+      "matches": ["https://example.com/*"],
       "js": ["login-fill.js"],
       "run_at": "document_idle",
       "all_frames": true

@@ -9,6 +9,9 @@ const clearCredentialsRow = document.querySelector("#clear-credentials-row");
 const shell = document.querySelector("#shell");
 const sidebarToggle = document.querySelector("#toggle-sidebar");
 const groupSelect = document.querySelector("#app-group");
+const usernameInput = document.querySelector("#app-username");
+const passwordInput = document.querySelector("#app-password");
+const passwordToggle = document.querySelector("#toggle-password");
 let apps = [];
 let groups = [];
 let launchTimeout;
@@ -85,7 +88,7 @@ function createSystemCard(app) {
   host.textContent = hostOf(app.url);
   const credentials = document.createElement("div");
   credentials.className = "app-credentials";
-  [["账号", app.hasUsername ? "已保存" : ""], ["密码", app.passwordMasked]].forEach(([label, value]) => {
+  [["账号", app.username || ""], ["密码", app.passwordMasked]].forEach(([label, value]) => {
     if (!value) return;
     const row = document.createElement("span");
     const key = document.createElement("b");
@@ -199,9 +202,17 @@ function populateGroupSelect(selectedGroupId) {
   groupSelect.value = selectedGroupId || groups.find((group) => group.id === "uncategorized")?.id || groups[0]?.id || "";
 }
 
-function openEditor(app = null) {
+function resetPasswordVisibility() {
+  passwordInput.type = "password";
+  passwordToggle.setAttribute("aria-label", "显示密码");
+  passwordToggle.setAttribute("aria-pressed", "false");
+  passwordToggle.title = "显示密码";
+}
+
+async function openEditor(app = null) {
   closeMenus();
   form.reset();
+  resetPasswordVisibility();
   formError.textContent = "";
   document.querySelector("#app-id").value = app?.id || "";
   document.querySelector("#app-name").value = app?.name || "";
@@ -216,14 +227,30 @@ function openEditor(app = null) {
   clearCredentialsRow.hidden = !hasCredentials;
   document.querySelector("#clear-credentials").checked = false;
   dialog.showModal();
+  if (!hasCredentials) return;
+
+  credentialNote.textContent = "正在读取本机保存的信息…";
+  try {
+    const response = await fetch(`/api/credentials/${encodeURIComponent(app.id)}`, { cache: "no-store" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "无法读取登录信息");
+    if (document.querySelector("#app-id").value !== app.id) return;
+    usernameInput.value = result.username || "";
+    passwordInput.value = result.password || "";
+    credentialNote.textContent = "已回显本机保存的信息。";
+  } catch (error) {
+    credentialNote.textContent = `无法回显：${error.message}`;
+    formError.textContent = "无法读取本机保存的登录信息。";
+  }
 }
 
 async function saveApp(event) {
   event.preventDefault();
   formError.textContent = "";
   const id = document.querySelector("#app-id").value;
-  const username = document.querySelector("#app-username").value.trim();
-  const password = document.querySelector("#app-password").value;
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
+  const clearCredentials = document.querySelector("#clear-credentials").checked;
   const payload = {
     name: document.querySelector("#app-name").value,
     url: document.querySelector("#app-url").value,
@@ -232,9 +259,11 @@ async function saveApp(event) {
     groupId: groupSelect.value,
   };
   if (id) payload.id = id;
-  if (username) payload.username = username;
-  if (password) payload.password = password;
-  if (document.querySelector("#clear-credentials").checked) payload.clearCredentials = true;
+  if (clearCredentials) payload.clearCredentials = true;
+  else {
+    if (username) payload.username = username;
+    if (password) payload.password = password;
+  }
   try {
     const response = await fetch("/api/apps", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     const result = await response.json();
@@ -317,6 +346,13 @@ async function loadApps() {
 
 document.querySelector("#add-app").addEventListener("click", () => openEditor());
 document.querySelector("#add-group").addEventListener("click", addGroup);
+passwordToggle.addEventListener("click", () => {
+  const visible = passwordInput.type === "password";
+  passwordInput.type = visible ? "text" : "password";
+  passwordToggle.setAttribute("aria-label", visible ? "隐藏密码" : "显示密码");
+  passwordToggle.setAttribute("aria-pressed", String(visible));
+  passwordToggle.title = visible ? "隐藏密码" : "显示密码";
+});
 sidebarToggle.addEventListener("click", () => {
   const expanded = shell.classList.toggle("sidebar-expanded");
   sidebarToggle.setAttribute("aria-expanded", String(expanded));
