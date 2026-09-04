@@ -52,7 +52,7 @@ function waitForLoginAction(login, timeoutMs = 10000) {
     });
     const timer = setTimeout(() => {
       observer.disconnect();
-      reject(new Error(`Login action is still disabled: ${selector}`));
+      reject(new Error("登录按钮未找到或仍处于禁用状态"));
     }, timeoutMs);
     observer.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
   });
